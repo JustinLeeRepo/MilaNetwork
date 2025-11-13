@@ -26,6 +26,7 @@ public protocol APIEndpoint {
 }
 
 public protocol NetworkServiceProtocol {
+    @discardableResult
     func performRequest<T: Decodable>(_ endpoint: APIEndpoint) async throws -> T
 }
 
