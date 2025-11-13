@@ -19,6 +19,7 @@ public enum HTTPMethod: String {
 public protocol APIEndpoint {
     var base: String { get }
     var path: String { get }
+    var queryItems: [URLQueryItem]? { get }
     var method: HTTPMethod { get }
     var body: Encodable? { get }
     var authToken: String? { get }

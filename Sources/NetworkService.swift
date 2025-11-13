@@ -12,6 +12,10 @@ import Foundation
 public class NetworkService: NetworkServiceProtocol {
     private let session: URLSession = .shared
     
+    public init() {
+        
+    }
+    
     @discardableResult
     public func performRequest<T: Decodable>(_ endpoint: APIEndpoint) async throws -> T {
         let request = try createRequest(endpoint: endpoint)
@@ -35,7 +39,9 @@ public class NetworkService: NetworkServiceProtocol {
     }
     
     private func createRequest(endpoint: APIEndpoint) throws -> URLRequest {
-        guard let url = URL(string: "\(endpoint.base)/\(endpoint.path)") else {
+        var urlComponent = URLComponents(string: "\(endpoint.base)/\(endpoint.path)")
+        urlComponent?.queryItems = endpoint.queryItems
+        guard let url = urlComponent?.url?.absoluteURL else {
             throw ServiceError.invalidURL
         }
         

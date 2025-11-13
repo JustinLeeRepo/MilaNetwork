@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum ServiceError: LocalizedError, Equatable {
+public enum ServiceError: LocalizedError, Equatable {
     case invalidURL
     case noData
     case unauthorized
@@ -17,7 +17,7 @@ enum ServiceError: LocalizedError, Equatable {
     case encodingError
     case networkError(Error)
     
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .invalidURL:
             return "Invalid URL"
@@ -36,7 +36,7 @@ enum ServiceError: LocalizedError, Equatable {
         }
     }
     
-    static func == (lhs: ServiceError, rhs: ServiceError) -> Bool {
+    public static func == (lhs: ServiceError, rhs: ServiceError) -> Bool {
         switch (lhs, rhs) {
         case (.invalidURL, .invalidURL),
              (.noData, .noData),
