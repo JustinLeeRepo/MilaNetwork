@@ -9,6 +9,8 @@
 
 import Foundation
 
+struct EmptyResponse: Decodable {}
+
 public class NetworkService: NetworkServiceProtocol {
     private let session: URLSession = .shared
     
@@ -25,8 +27,8 @@ public class NetworkService: NetworkServiceProtocol {
             
             try validateResponse(response: response)
             
-            if T.self == Void.self {
-                return () as! T
+            if T.self == EmptyResponse.self {
+                return EmptyResponse() as! T
             }
             
             return try decodeData(data: data)
@@ -36,6 +38,10 @@ public class NetworkService: NetworkServiceProtocol {
         } catch {
             throw ServiceError.networkError(error)
         }
+    }
+    
+    public func performRequest(_ endpoint: APIEndpoint) async throws {
+        let _: EmptyResponse = try await performRequest(endpoint)
     }
     
     private func createRequest(endpoint: APIEndpoint) throws -> URLRequest {
