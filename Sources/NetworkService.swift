@@ -31,7 +31,7 @@ public class NetworkService: NetworkServiceProtocol {
                 return EmptyResponse() as! T
             }
             
-            return try decodeData(data: data)
+            return try decodeData(data: data, dateDecodingStrategy: endpoint.dateDecodingStrategy)
             
         } catch let error as ServiceError {
             throw error

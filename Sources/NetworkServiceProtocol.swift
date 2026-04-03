@@ -23,6 +23,7 @@ public protocol APIEndpoint {
     var method: HTTPMethod { get }
     var body: Encodable? { get }
     var authToken: String? { get }
+    var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy { get }
 }
 
 public protocol NetworkServiceProtocol {
@@ -32,3 +33,6 @@ public protocol NetworkServiceProtocol {
     func performRequest(_ endpoint: APIEndpoint) async throws
 }
 
+public extension APIEndpoint {
+    var dateDecodingStrategy: JSONDecoder.DateDecodingStrategy { .iso8601 }
+}
