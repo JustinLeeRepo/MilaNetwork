@@ -11,6 +11,17 @@ import Foundation
 
 struct EmptyResponse: Decodable {}
 
+// Helper struct to decode error messages from server responses
+struct ErrorResponse: Decodable {
+    let message: String?
+    let error: String?
+    let detail: String?
+    
+    var errorMessage: String? {
+        message ?? error ?? detail
+    }
+}
+
 public class NetworkService: NetworkServiceProtocol {
     private let session: URLSession = .shared
     
@@ -25,7 +36,7 @@ public class NetworkService: NetworkServiceProtocol {
         do {
             let (data, response) = try await session.data(for: request)
             
-            try validateResponse(response: response)
+            try validateResponse(response: response, data: data)
             
             if T.self == EmptyResponse.self {
                 return EmptyResponse() as! T
@@ -71,18 +82,35 @@ public class NetworkService: NetworkServiceProtocol {
         return request
     }
     
-    private func validateResponse(response: URLResponse) throws {
+    private func validateResponse(response: URLResponse, data: Data?) throws {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServiceError.networkError(URLError(.badServerResponse))
+        }
+        
+        // Try to extract error message from response data if available
+        let errorMessage = data.flatMap { data -> String? in
+            try? JSONDecoder().decode(ErrorResponse.self, from: data).errorMessage
         }
         
         switch httpResponse.statusCode {
         case 200...299:
             return
+        case 400:
+            throw ServiceError.badRequest(message: errorMessage)
         case 401:
-            throw ServiceError.unauthorized
+            throw ServiceError.unauthorized(message: errorMessage)
+        case 403:
+            throw ServiceError.forbidden(message: errorMessage)
+        case 404:
+            throw ServiceError.notFound(message: errorMessage)
+        case 422:
+            throw ServiceError.unprocessableEntity(message: errorMessage)
+        case 429:
+            throw ServiceError.tooManyRequests(message: errorMessage)
+        case 500...599:
+            throw ServiceError.serverError(httpResponse.statusCode, message: errorMessage)
         default:
-            throw ServiceError.serverError(httpResponse.statusCode)
+            throw ServiceError.serverError(httpResponse.statusCode, message: errorMessage)
         }
     }
     
